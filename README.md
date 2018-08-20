@@ -1,1 +1,0 @@
-# ensemble_band_gap_prediction
