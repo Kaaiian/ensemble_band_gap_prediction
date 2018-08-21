@@ -89,8 +89,11 @@ def train_models():
         else:
             print('error!')
 
+        model.fit(X_exp_train, y_exp_train)
+        y_test_prediction = pd.DataFrame(model.prediction(X_exp_test))
         display.actual_vs_predicted(y_actual, y_predicted, data_label= name + ' prediction', save=True, save_name=base_path + path + 'figures/' + name)
-        y_predicted.to_csv(base_path + path + 'predictions/' + name + '.csv', index=False)
+        y_predicted.to_csv(base_path + path + 'predictions/' + name + '_train.csv', index=False)
+        y_test_prediction.to_csv(base_path + path + 'predictions/' + name + '_test.csv', index=False)
         joblib.dump(model, base_path + path + 'model/' + name + '.pkl') 
         recorded_cv.append(metrics) 
         
