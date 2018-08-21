@@ -48,6 +48,7 @@ X_exp_test = df_exp_test.iloc[:,1:-1]
 y_exp_test = df_exp_test.iloc[:,-1]
 
 # %%
+
 def combined_band_gap(database='combined'):
     # access the aflow data
     aflow_path = base_path + 'NeuralNetwork/Data/aflow-vectorized-train-data/'
@@ -57,67 +58,62 @@ def combined_band_gap(database='combined'):
 
     # get the name of the property being used    
     prop = 'Band Gap'
-    
+
     # acess the aflow data
     df_aflow_training_data = pd.read_csv( aflow_path + 'aflow vectorized '+prop+'.csv')
     df_aflow_training_data = df_aflow_training_data.iloc[:, 1:]
-    
+
     # acess the materials project (mp) data
     df_mp_training_data = pd.read_csv(mp_path + 'mp vectorized '+prop+'.csv')
     df_mp_training_data = df_mp_training_data.iloc[:, 1:]
-    
+
     if database == 'combined':
         # combined the aflow and dft data for learning
         df = pd.concat([df_aflow_training_data, df_mp_training_data], axis=0, ignore_index=True)
-        
+
     elif database == 'aflow':
         df = df_aflow_training_data
-        
+
     elif database == 'mp':
         df = df_mp_training_data
-        
+
     return df, prop, database
 
-df, prop, database = combined_band_gap(database='aflow')
 
 # %%
 
-modeldft.fit(df_combined_training_data, prop, database, epochs=300, batch_size=2500, evaluate=True)
-print(np.sqrt(modeldft.mse))
-print([modeldft.n1,
-       modeldft.drop1,
-       modeldft.n2,
-       modeldft.drop2,
-       modeldft.n3,
-       modeldft.drop3,
-       modeldft.lr,
-       modeldft.decay])
+def train_model(df, prop, database):
+    modeldft = ModelDFT()
+    if database == 'combined':
+        epochs = 800
+    elif database == 'aflow':
+        epochs = 1500
+    else:
+        epochs = 1500
     
-# %%
-#
-y_exp_train_predicted = modeldft.predict(X_exp_train)
-y_exp_train_predicted.to_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN ' + database + ' ' + prop + '.csv', index=False)
+    modeldft.fit(df, prop, database, epochs=epochs, batch_size=epochs, evaluate=True)
+    print(np.sqrt(modeldft.mse))
+    print([modeldft.n1,
+           modeldft.drop1,
+           modeldft.n2,
+           modeldft.drop2,
+           modeldft.n3,
+           modeldft.drop3,
+           modeldft.lr,
+           modeldft.decay])
+    
+    print('\a')
+    
+    y_exp_train_predicted = modeldft.predict(X_exp_train)
+    y_exp_train_predicted.to_csv(base_path + 'NeuralNetwork/predictions/train/y_exp_train_predicted NN ' + database + ' ' + prop + '.csv', index=False)
+    
+    y_exp_test_predicted = modeldft.predict(X_exp_test)
+    y_exp_test_predicted.to_csv(base_path + 'NeuralNetwork/predictions/test/y_exp_test_predicted NN ' + database + ' ' + prop + '.csv', index=False)
+    
+    modeldft.save_model()
 
-
-y_exp_test_predicted = modeldft.predict(X_exp_test)
-y_exp_test_predicted.to_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN ' + database + ' ' + prop + '.csv', index=False)
-
-
-# %%
-#modeldft = ModelDFT()
-#
-##update_architecture(modeldft)
-#modeldft.dummy_model(test_data, prop, database, epochs=1000, batch_size=2500, evaluate=True)
-#
-#cv.nn_dict = {'epochs':5000, 'batch_size':2500, 'verbose':0}
-##cv.nn_dict = {}
-#y_actual, y_predicted, metrics, data_index = cv.cross_validate(modeldft.X_train, modeldft.y_train, modeldft.model)
-#display.actual_vs_predicted(y_actual, y_predicted, main_color='#073b4c', mfc='#073b4c')
-#
-#print(metrics.T.mean())
-#
-#modeldft.fit(test_data, 'Total Magnetization', 'aflow', evaluate=True)
 # %%
 
-#modeldft.save_model()
-
+for database in ['combined', 'aflow', 'mp']:
+    df, prop, database = combined_band_gap(database)
+    train_model(df, prop, database)

@@ -5,6 +5,7 @@ Cutsom class to allow for modeling of dft data using Neural Network
 
 """
 
+base_path = r'/home/steven/Research/PhD/DFT Ensemble Models/publication code/Ensemble/'
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
@@ -42,8 +43,8 @@ load_model:
         self.drop2 = 0.35
         self.n3 = 89
         self.drop3 = 0.2
-        self.lr = 0.0005
-        self.decay = 5e-5
+        self.lr = 0.01
+        self.decay = 1e-2
         pass
 
     def pre_fit_(self, df, prop, database, epochs=500, batch_size=2500, evaluate=False):
@@ -117,7 +118,7 @@ load_model:
         return self.y_prediction
 
     def save_model(self):
-        path = self.database+'-models/'
+        path = self.database+'-model/'
         # save scaling
         scaler_filename = path + "scaler " + self.prop +".save"
         joblib.dump(self.scaler, scaler_filename)
@@ -132,18 +133,17 @@ load_model:
         self.model.save_weights(path + "model "+self.prop+".h5")
         print("Saved model to disk")
 
-    def load_model(self, prop='Band Gap'):
-        path = self.database+'-models/'
-
+    def load_model(self, prop='Band Gap', database='combined'):
+        path = database+'-model/'
         # load json and create model
-        json_file = open(path + "model " + self.prop + ".json", 'r')
+        json_file = open(path + "model " + prop + ".json", 'r')
         loaded_model_json = json_file.read()
         json_file.close()
         self.model = model_from_json(loaded_model_json)
         # load weights into new model
-        self.model.load_weights(path + "model " + self.prop +".h5")
-        self.scaler = joblib.load(path + "scaler " + self.prop +".save")
-        self.normalizer = joblib.load(path + "normalizer " + self.prop +".save")
+        self.model.load_weights(path + "model " + prop +".h5")
+        self.scaler = joblib.load(path + "scaler " + prop +".save")
+        self.normalizer = joblib.load(path + "normalizer " + prop +".save")
         print("Loaded model from disk")
         
     def model_fit_(self):
@@ -253,21 +253,29 @@ load_model:
 
         # Fit the model
         history = self.model.fit(self.X_train, self.y_train, validation_split=0.2, epochs=self.epochs, batch_size=self.batch_size, verbose=0)
-
+        self.mse = sum(history.history['val_loss'][-10:])/10
+        self.min_mse = min(history.history['val_loss'])
         plt.figure(1, figsize=(7, 7))
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['val_loss'])
-        plt.plot([-0,1000], [0.5, 0.5])
-        plt.title('model loss')
+        font = {'family': 'DejaVu Sans',
+                'weight': 'normal',
+                'size': 18}
+        plt.rc('font', **font)
+
+        plt.plot(history.history['loss'], color='#06d6a0', linestyle='-', linewidth=3.0)
+        plt.plot(history.history['val_loss'], color='#ef476f', linestyle='--', linewidth=3.0)
+        plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+        plt.title('final model loss (MSE): ' + str(self.mse))
         plt.ylabel('loss')
         plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
+        plt.legend(['train', 'test'], loc='upper right')
         plt.ylim([0.0, 2*min(history.history['val_loss'])])
+        save_name = self.database + '-' + self.prop + ' NN training'
+        plt.savefig( base_path + 'NeuralNetwork/' + 'figures/' + save_name + '.eps', format='eps', dpi=1200, bbox_inches='tight')
+        plt.savefig(base_path + 'NeuralNetwork/' + 'figures/' + save_name + '.png', format='png', dpi=300, bbox_inches='tight')
+        print('figures save')
         plt.show()
-        self.min_mse = min(history.history['val_loss'])
         print('min_err:', self.min_mse)
-        self.mse = sum(history.history['val_loss'][-10:])/10
         print('MSE:', self.mse)
         t_f = time.time()
         print('time:', str(t_f - t_i)+' secs')
-
+        

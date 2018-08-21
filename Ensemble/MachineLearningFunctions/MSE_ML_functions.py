@@ -365,6 +365,8 @@ class CrossValidate:
             y_actual += list(y_test)
             y_predicted += list(predicted_test)
         metrics = pd.DataFrame(metrics)
+        y_actual = pd.Series(y_actual)
+        y_predicted = pd.Series(y_predicted, index = data_index)
 
         return y_actual, y_predicted, metrics, data_index
 
@@ -483,8 +485,8 @@ class DisplayData:
         if save is False:
             plt.show()
         if save is True:
-            plt.savefig('figures/' + save_name + '.eps', format='eps', dpi=1200, bbox_inches='tight')
-            plt.savefig('figures/' + save_name + '.png', format='png', dpi=300, bbox_inches='tight')
+            plt.savefig(save_name + '.eps', format='eps', dpi=1200, bbox_inches='tight')
+            plt.savefig(save_name + '.png', format='png', dpi=300, bbox_inches='tight')
             print('figures save')
             plt.show()
 
