@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
@@ -39,14 +40,14 @@ lr_test = pd.read_csv('ExperimentalModels/LinearRegression/predictions/lr_test.c
 
 # %%
 # read in DFT predictions'
-aflow_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN aflow Band Gap1.csv')
-aflow_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN aflow Band Gap1.csv')
+aflow_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN aflow Band Gap.csv')
+aflow_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN aflow Band Gap.csv')
 
-mp_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN mp Band Gap1.csv')
-mp_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN mp Band Gap1.csv')
+mp_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN mp Band Gap.csv')
+mp_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN mp Band Gap.csv')
 
-combined_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN combined Band Gap1.csv')
-combined_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN combined Band Gap1.csv')
+combined_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN combined Band Gap.csv')
+combined_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN combined Band Gap.csv')
 
 # %%
 
@@ -59,7 +60,7 @@ X_ensemble_train['rf'] = rf_train
 #X_ensemble_train['aflow'] = aflow_train
 #X_ensemble_train['mp'] = mp_train
 X_ensemble_train['combined'] = combined_train
-
+#
 #display.actual_vs_predicted(X_ensemble_train['combined'], X_ensemble_train['aflow'])
 #display.actual_vs_predicted(y_exp_train, X_ensemble_train['svr'])
 
@@ -68,11 +69,11 @@ X_ensemble_train['combined'] = combined_train
 #names = ['svr', 'gbr', 'rf', 'lr']
 
 svr = SVR(C=100, gamma=0.001)
-gmr = GradientBoostingRegressor(n_estimators=100, max_depth=2)
+gmr = GradientBoostingRegressor(n_estimators=500, max_depth=2)
 rf = RandomForestRegressor(n_estimators=150)
 lr = LinearRegression()
 #
-model = svr
+model = gmr
 #
 y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
 display.actual_vs_predicted(y_actual, y_predicted)
@@ -95,15 +96,23 @@ X_ensemble_test['combined'] = combined_test
 
 y_ensemble = model.predict(X_ensemble_test)
 
-scores = [r2_score(X_ensemble_test['svr'], y_exp_test),
+scores = [
+        r2_score(X_ensemble_test['svr'], y_exp_test),
         r2_score(X_ensemble_test['gbr'], y_exp_test),
         r2_score(X_ensemble_test['rf'], y_exp_test),
-        r2_score(y_ensemble, y_exp_test)]
+        r2_score(y_ensemble, y_exp_test)
+        ]
 
-mse = [mean_squared_error(X_ensemble_test['svr'], y_exp_test),
-        mean_squared_error(X_ensemble_test['gbr'], y_exp_test),
-        mean_squared_error(X_ensemble_test['rf'], y_exp_test),
-        mean_squared_error(y_ensemble, y_exp_test)]
+rmse = [
+        np.sqrt(mean_squared_error(X_ensemble_test['svr'], y_exp_test)),
+        np.sqrt(mean_squared_error(X_ensemble_test['gbr'], y_exp_test)),
+        np.sqrt(mean_squared_error(X_ensemble_test['rf'], y_exp_test)),
+        np.sqrt(mean_squared_error(y_ensemble, y_exp_test))
+        ]
+
+score_impv = (max(scores[:-1]) - r2_score(y_ensemble, y_exp_test))/max(scores[:-1])*100
+rmse_impv = (min(rmse[:-1]) - np.sqrt(mean_squared_error(y_ensemble, y_exp_test)))/min(rmse[:-1])*100
 
 print(scores)
-print(mse)
+print(rmse)
+print('%score, % rmse:', score_impv, rmse_impv)
