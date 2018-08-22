@@ -92,7 +92,9 @@ class VectorizeFormula:
         # drop elements that aren't included in the elmenetal properties list.
         # These will be returned as feature rows completely full of Nan values.
         X.dropna(inplace=True, how='all')
-#        y = y.loc[X.index]
+        y = y.loc[X.index]
+        y.name = 'target'
+        formula = df['formula'].loc[X.index]
 
         if reset_index is True:
             # reset dataframe indices to simplify code later.
@@ -105,7 +107,7 @@ class VectorizeFormula:
         median_values = X[cols].median()
         # fill the missing values in each column with the columns mean value
         X[cols] = X[cols].fillna(median_values.iloc[0])
-        return X, y
+        return X, y, formula
 
 class VectorizeFormulaMinimal:
 
@@ -366,7 +368,7 @@ class CrossValidate:
             y_predicted += list(predicted_test)
         metrics = pd.DataFrame(metrics)
         y_actual = pd.Series(y_actual)
-        y_predicted = pd.Series(y_predicted, index = data_index)
+        y_predicted = pd.Series(y_predicted, index = data_index, name='predicted')
 
         return y_actual, y_predicted, metrics, data_index
 

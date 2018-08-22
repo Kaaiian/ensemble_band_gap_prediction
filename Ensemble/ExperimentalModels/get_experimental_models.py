@@ -17,7 +17,6 @@ sys.path.insert(0, base_path)
 from MachineLearningFunctions.MSE_ML_functions import CrossValidate
 from MachineLearningFunctions.MSE_ML_functions import DisplayData
 
-
 # import code from the standard library 
 import numpy as np
 import pandas as pd
@@ -25,14 +24,12 @@ import os
 import time
 
 # read in machine learning code
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.linear_model import LinearRegression, Lasso
-from sklearn.metrics import r2_score, mean_squared_error
-from sklearn.preprocessing import StandardScaler, Normalizer
+from sklearn.linear_model import LinearRegression
 from sklearn.externals import joblib
+from sklearn.preprocessing import StandardScaler, Normalizer
 
 # create objects from custom code
 cv = CrossValidate()
@@ -55,43 +52,64 @@ y_exp_test = df_exp_test.iloc[:,-1]
 
 # %%
 
-svr = SVR(C=10, gamma=1) # r2, mse: 0.818253504446 0.381034083801
-gbr = GradientBoostingRegressor(n_estimators=150, max_depth=7) # r2, mse: 0.792820362553 0.434355023441
-rf = RandomForestRegressor(n_estimators=150, max_features='sqrt') # r2, mse: 0.78243767623 0.456122471329
-lr = LinearRegression()
-
-model = lr
-
-y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_exp_train, y_exp_train, model, N=5, random_state=1, scale_data=True)
+svr = SVR(C=10, gamma=1)  # r2, mse: 0.815124277636 0.396226799328
+gbr = GradientBoostingRegressor(n_estimators=500, max_depth=5)  # r2, mse: 0.826690242764 0.371438550849
+rf = RandomForestRegressor(n_estimators=500, max_features='sqrt') 
+lr = LinearRegression() 
+#
+model = gbr
+#
+y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_exp_train, y_exp_train, model, N=10, random_state=1, scale_data=False)
 display.actual_vs_predicted(y_actual, y_predicted)
-
+#
 r2, mse = r2_score(y_actual, y_predicted), mean_squared_error(y_actual, y_predicted)
 print('r2, mse:', r2, mse)
 
 # %%
 models = [svr, gbr, rf, lr]
 names = ['svr', 'gbr', 'rf', 'lr']
+#models = [svr]
+#names = ['svr']
 recorded_cv = []
-def train_models():
+def train_models(X_exp_test):
 
     for model, name in zip(models, names):
-    #    cross_validate(self, X, y, model, N=5, random_state=None, scale_data=False)
-        y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_exp_train, y_exp_train, model, N=5, random_state=1, scale_data=True)
-        
+    
         if name == 'svr':
             path = 'ExperimentalModels/SupportVectorRegression/'
+            scaler = StandardScaler().fit(X_exp_train)
+            X_train = scaler.transform(X_exp_train)
+            normalizer = Normalizer().fit(X_train)
+            X_train = pd.DataFrame(normalizer.transform(X_train))
+            X_exp_test = scaler.transform(X_exp_test)
+            X_exp_test = normalizer.transform(X_exp_test)
+            y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
+
         elif name == 'gbr':
             path = 'ExperimentalModels/GradientBoostingRegression/'
+            y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
+            
         elif name == 'rf':
             path = 'ExperimentalModels/RandomForestRegression/'
+            y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
+            
         elif name == 'lr':
+            scaler = StandardScaler().fit(X_exp_train)
+            X_train = scaler.transform(X_exp_train)
+            normalizer = Normalizer().fit(X_train)
+            X_train = pd.DataFrame(normalizer.transform(X_train))
+            X_exp_test = scaler.transform(X_exp_test)
+            X_exp_test = normalizer.transform(X_exp_test)
+            y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
             path = 'ExperimentalModels/LinearRegression/'
         else:
             print('error!')
 
-        model.fit(X_exp_train, y_exp_train)
-        y_test_prediction = pd.DataFrame(model.prediction(X_exp_test))
+        model.fit(X_train, y_exp_train)
+
+        y_test_prediction = pd.Series(model.predict(X_exp_test))
         display.actual_vs_predicted(y_actual, y_predicted, data_label= name + ' prediction', save=True, save_name=base_path + path + 'figures/' + name)
+        y_predicted.sort_index(inplace=True)
         y_predicted.to_csv(base_path + path + 'predictions/' + name + '_train.csv', index=False)
         y_test_prediction.to_csv(base_path + path + 'predictions/' + name + '_test.csv', index=False)
         joblib.dump(model, base_path + path + 'model/' + name + '.pkl') 
@@ -101,4 +119,4 @@ def train_models():
     for metric, name in zip(recorded_cv, names):
         metric.to_excel(writer, sheet_name=name)
 
-train_models()
+train_models(X_exp_test)

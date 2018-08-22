@@ -91,8 +91,7 @@ def train_model(df, prop, database):
     else:
         epochs = 1500
     
-    modeldft.fit(df, prop, database, epochs=epochs, batch_size=epochs, evaluate=True)
-    print(np.sqrt(modeldft.mse))
+    modeldft.fit(df, prop, database, epochs=epochs, batch_size=epochs, evaluate=False)
     print([modeldft.n1,
            modeldft.drop1,
            modeldft.n2,
@@ -105,10 +104,10 @@ def train_model(df, prop, database):
     print('\a')
     
     y_exp_train_predicted = modeldft.predict(X_exp_train)
-    y_exp_train_predicted.to_csv(base_path + 'NeuralNetwork/predictions/train/y_exp_train_predicted NN ' + database + ' ' + prop + '.csv', index=False)
+    y_exp_train_predicted.to_csv(base_path + 'NeuralNetwork/predictions/train/y_exp_train_predicted NN ' + database + ' ' + prop + '1.csv', index=False)
     
     y_exp_test_predicted = modeldft.predict(X_exp_test)
-    y_exp_test_predicted.to_csv(base_path + 'NeuralNetwork/predictions/test/y_exp_test_predicted NN ' + database + ' ' + prop + '.csv', index=False)
+    y_exp_test_predicted.to_csv(base_path + 'NeuralNetwork/predictions/test/y_exp_test_predicted NN ' + database + ' ' + prop + '1.csv', index=False)
     
     modeldft.save_model()
 
