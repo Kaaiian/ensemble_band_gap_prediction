@@ -11,7 +11,7 @@ Created on Mon Aug 20 20:17:16 2018
 import sys
 ## base_path = r'location of the folder Esemble'
 base_path = r'/home/steven/Research/PhD/DFT Ensemble Models/publication code/Ensemble/'
-base_path = r'F:\Sparks Group\Research - ML model based features\publication code\ensemble_band_gap_prediction\Ensemble/'
+#base_path = r'F:\Sparks Group\Research - ML model based features\publication code\ensemble_band_gap_prediction\Ensemble/'
 sys.path.insert(0, base_path)
 
 # read in custom functions and classes
@@ -54,21 +54,21 @@ y_exp_test = df_exp_test.iloc[:,-1]
 # %%
 
 svr = SVR(C=10, gamma=1)  # r2, mse: 0.815124277636 0.396226799328
-gbr = GradientBoostingRegressor(n_estimators=500, max_depth=5)  # r2, mse: 0.826690242764 0.371438550849
+gbr = GradientBoostingRegressor(n_estimators=500, max_depth=3)  # r2, mse: 0.826690242764 0.371438550849
 rf = RandomForestRegressor(n_estimators=500, max_features='sqrt') 
 lr = LinearRegression() 
 #
 model = gbr
 #
-y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_exp_train, y_exp_train, model, N=10, random_state=1, scale_data=False)
-display.actual_vs_predicted(y_actual, y_predicted)
-#
-r2, mse = r2_score(y_actual, y_predicted), mean_squared_error(y_actual, y_predicted)
-print('r2, mse:', r2, mse)
+#y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_exp_train, y_exp_train, model, N=10, random_state=1, scale_data=False)
+#display.actual_vs_predicted(y_actual, y_predicted)
+##
+#r2, mse = r2_score(y_actual, y_predicted), mean_squared_error(y_actual, y_predicted)
+#print('r2, mse:', r2, mse)
 
 # %%
-models = [svr, gbr, rf, lr]
-names = ['svr', 'gbr', 'rf', 'lr']
+#models = [svr, gbr, rf, lr]
+#names = ['svr', 'gbr', 'rf', 'lr']
 models = [gbr]
 names = ['gbr']
 recorded_cv = []
@@ -87,6 +87,8 @@ def train_models(X_exp_test):
 
         elif name == 'gbr':
             path = 'ExperimentalModels/GradientBoostingRegression/'
+            X_exp_test = scaler.transform(X_exp_test)
+            X_exp_test = pd.DataFrame(normalizer.transform(X_exp_test))
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
 
         elif name == 'rf':

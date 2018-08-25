@@ -27,9 +27,35 @@ def calc_mape(y_act, y_pred):
         else:
             print('error')
     mape = sum(ape)/len(ape)
-    plt.plot(y_act, ape, 'ro')
-    plt.show()
+#    plt.plot(y_act, ape, 'ro')
+#    plt.show()
     return mape
+
+
+def return_metrics(y_true, y_pred, X_ensemble):
+    
+    scores = [r2_score(y_true, X_ensemble['svr']),
+            r2_score(y_true, X_ensemble['gbr']),
+            r2_score(y_true, X_ensemble['rf']),
+            r2_score(y_true, y_pred)]
+    
+    rmse = [np.sqrt(mean_squared_error(y_true, X_ensemble['svr'])),
+            np.sqrt(mean_squared_error(y_true, X_ensemble['gbr'])),
+            np.sqrt(mean_squared_error(y_true, X_ensemble['rf'])),
+            np.sqrt(mean_squared_error(y_true, y_pred))]
+    
+    mape = [calc_mape(y_true, X_ensemble['svr']),
+            calc_mape(y_true, X_ensemble['gbr']),
+            calc_mape(y_true, X_ensemble['rf']),
+            calc_mape(y_true, y_pred)]
+    
+    print(scores)
+    print(rmse)
+    print(mape)
+    
+    print('% score', (scores[0]-scores[-1])/scores[0]*100)
+    print('% rmse', (rmse[0]-rmse[-1])/rmse[0]*100)
+    print('% mape', (mape[0]-mape[-1])/mape[0]*100)
 
 # %%
 
@@ -57,14 +83,14 @@ lr_test = pd.read_csv('ExperimentalModels/LinearRegression/predictions/lr_test.c
 
 # %%
 # read in DFT predictions'
-aflow_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN aflow Band Gap1.csv')
-aflow_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN aflow Band Gap1.csv')
+aflow_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN aflow Band Gap.csv')
+aflow_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN aflow Band Gap.csv')
 
-mp_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN mp Band Gap1.csv')
-mp_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN mp Band Gap1.csv')
+mp_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN mp Band Gap.csv')
+mp_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN mp Band Gap.csv')
 
-combined_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN combined Band Gap1.csv')
-combined_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN combined Band Gap1.csv')
+combined_train = pd.read_csv('NeuralNetwork/predictions/train/y_exp_train_predicted NN combined Band Gap.csv')
+combined_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted NN combined Band Gap.csv')
 
 # %%
 
@@ -85,8 +111,9 @@ X_ensemble_train['combined'] = combined_train
 #models = [svr, gbr, rf, lr]
 #names = ['svr', 'gbr', 'rf', 'lr']
 
-svr = SVR(C=100, gamma=0.001)
-gmr = GradientBoostingRegressor(n_estimators=100, max_depth=2)
+#svr = SVR(C=100, gamma=0.001)
+svr = SVR(C=150, gamma=0.003)
+gmr = GradientBoostingRegressor(n_estimators=500, max_depth=3)
 rf = RandomForestRegressor(n_estimators=150)
 lr = LinearRegression()
 #
@@ -95,7 +122,7 @@ model = svr
 #y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
 #display.actual_vs_predicted(y_actual, y_predicted)
 #print(metrics.T.mean())
-#print(calc_mape(y_actual, y_predicted))
+#print((y_actual, y_predicted))
 
 # %%
 # # fit model if suitable results are found
@@ -113,25 +140,7 @@ X_ensemble_test['combined'] = combined_test
 
 y_ensemble = model.predict(X_ensemble_test)
 
-scores = [r2_score(y_exp_test, X_ensemble_test['svr']),
-        r2_score(y_exp_test, X_ensemble_test['gbr']),
-        r2_score(y_exp_test, X_ensemble_test['rf']),
-        r2_score(y_exp_test, y_ensemble)]
+return_metrics(y_exp_test, y_ensemble, X_ensemble_test)
 
-rmse = [np.sqrt(mean_squared_error(y_exp_test, X_ensemble_test['svr'])),
-        np.sqrt(mean_squared_error(y_exp_test, X_ensemble_test['gbr'])),
-        np.sqrt(mean_squared_error(y_exp_test, X_ensemble_test['rf'])),
-        np.sqrt(mean_squared_error(y_exp_test, y_ensemble))]
-
-mape = [calc_mape(y_exp_test, X_ensemble_test['svr']),
-        calc_mape(y_exp_test, X_ensemble_test['gbr']),
-        calc_mape(y_exp_test, X_ensemble_test['rf']),
-        calc_mape(y_exp_test, y_ensemble)]
-
-print(scores)
-print(rmse)
-print(mape)
-
-print('% score', (scores[0]-scores[-1])/scores[0]*100)
-print('% rmse', (rmse[0]-rmse[-1])/rmse[0]*100)
-print('% mape', (mape[0]-mape[-1])/mape[0]*100)
+display.actual_vs_predicted(y_exp_test, y_ensemble)
+display.actual_vs_predicted(y_exp_test, X_ensemble_test['svr'])
