@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
@@ -16,12 +18,28 @@ display.markersize = 8
 display.mfc='w'
 # %%
 
+def calc_mape(y_act, y_pred):
+    ape = []
+    for act, pred in zip(y_act, y_pred):
+        if act != 0:
+            val = abs(act-pred)/act+0.001 * 100
+            ape.append(val)
+        else:
+            print('error')
+    mape = sum(ape)/len(ape)
+    plt.plot(y_act, ape, 'ro')
+    plt.show()
+    return mape
+
+# %%
+
 # read in train and test data
 df_exp_train = pd.read_csv('ExperimentalData/df_exp_train.csv')
 df_exp_test = pd.read_csv('ExperimentalData/df_exp_test.csv')
 
 y_exp_train = df_exp_train.iloc[:, -1]
 y_exp_test = df_exp_test.iloc[:, -1]
+
 
 # %%
 # read in experimental predictions
@@ -74,9 +92,10 @@ lr = LinearRegression()
 #
 model = svr
 #
-y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
-display.actual_vs_predicted(y_actual, y_predicted)
-print(metrics.T.mean())
+#y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
+#display.actual_vs_predicted(y_actual, y_predicted)
+#print(metrics.T.mean())
+#print(calc_mape(y_actual, y_predicted))
 
 # %%
 # # fit model if suitable results are found
@@ -92,18 +111,27 @@ X_ensemble_test['rf'] = rf_test
 #X_ensemble_test['mp'] = mp_test
 X_ensemble_test['combined'] = combined_test
 
-
 y_ensemble = model.predict(X_ensemble_test)
 
-scores = [r2_score(X_ensemble_test['svr'], y_exp_test),
-        r2_score(X_ensemble_test['gbr'], y_exp_test),
-        r2_score(X_ensemble_test['rf'], y_exp_test),
-        r2_score(y_ensemble, y_exp_test)]
+scores = [r2_score(y_exp_test, X_ensemble_test['svr']),
+        r2_score(y_exp_test, X_ensemble_test['gbr']),
+        r2_score(y_exp_test, X_ensemble_test['rf']),
+        r2_score(y_exp_test, y_ensemble)]
 
-mse = [mean_squared_error(X_ensemble_test['svr'], y_exp_test),
-        mean_squared_error(X_ensemble_test['gbr'], y_exp_test),
-        mean_squared_error(X_ensemble_test['rf'], y_exp_test),
-        mean_squared_error(y_ensemble, y_exp_test)]
+rmse = [np.sqrt(mean_squared_error(y_exp_test, X_ensemble_test['svr'])),
+        np.sqrt(mean_squared_error(y_exp_test, X_ensemble_test['gbr'])),
+        np.sqrt(mean_squared_error(y_exp_test, X_ensemble_test['rf'])),
+        np.sqrt(mean_squared_error(y_exp_test, y_ensemble))]
+
+mape = [calc_mape(y_exp_test, X_ensemble_test['svr']),
+        calc_mape(y_exp_test, X_ensemble_test['gbr']),
+        calc_mape(y_exp_test, X_ensemble_test['rf']),
+        calc_mape(y_exp_test, y_ensemble)]
 
 print(scores)
-print(mse)
+print(rmse)
+print(mape)
+
+print('% score', (scores[0]-scores[-1])/scores[0]*100)
+print('% rmse', (rmse[0]-rmse[-1])/rmse[0]*100)
+print('% mape', (mape[0]-mape[-1])/mape[0]*100)
