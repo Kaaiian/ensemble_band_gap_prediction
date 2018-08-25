@@ -11,6 +11,7 @@ Created on Mon Aug 20 20:17:16 2018
 import sys
 ## base_path = r'location of the folder Esemble'
 base_path = r'/home/steven/Research/PhD/DFT Ensemble Models/publication code/Ensemble/'
+base_path = r'F:\Sparks Group\Research - ML model based features\publication code\ensemble_band_gap_prediction\Ensemble/'
 sys.path.insert(0, base_path)
 
 # read in custom functions and classes
@@ -68,40 +69,35 @@ print('r2, mse:', r2, mse)
 # %%
 models = [svr, gbr, rf, lr]
 names = ['svr', 'gbr', 'rf', 'lr']
-#models = [svr]
-#names = ['svr']
+models = [gbr]
+names = ['gbr']
 recorded_cv = []
 def train_models(X_exp_test):
-
+    scaler = StandardScaler().fit(X_exp_train)
+    X_train = scaler.transform(X_exp_train)
+    normalizer = Normalizer().fit(X_train)
+    X_train = pd.DataFrame(normalizer.transform(X_train))
     for model, name in zip(models, names):
-    
+
         if name == 'svr':
             path = 'ExperimentalModels/SupportVectorRegression/'
-            scaler = StandardScaler().fit(X_exp_train)
-            X_train = scaler.transform(X_exp_train)
-            normalizer = Normalizer().fit(X_train)
-            X_train = pd.DataFrame(normalizer.transform(X_train))
             X_exp_test = scaler.transform(X_exp_test)
-            X_exp_test = normalizer.transform(X_exp_test)
+            X_exp_test = pd.DataFrame(normalizer.transform(X_exp_test))
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
 
         elif name == 'gbr':
             path = 'ExperimentalModels/GradientBoostingRegression/'
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
-            
+
         elif name == 'rf':
             path = 'ExperimentalModels/RandomForestRegression/'
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
-            
+
         elif name == 'lr':
-            scaler = StandardScaler().fit(X_exp_train)
-            X_train = scaler.transform(X_exp_train)
-            normalizer = Normalizer().fit(X_train)
-            X_train = pd.DataFrame(normalizer.transform(X_train))
-            X_exp_test = scaler.transform(X_exp_test)
-            X_exp_test = normalizer.transform(X_exp_test)
-            y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
             path = 'ExperimentalModels/LinearRegression/'
+            X_exp_test = scaler.transform(X_exp_test)
+            X_exp_test = pd.DataFrame(normalizer.transform(X_exp_test))
+            y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
         else:
             print('error!')
 
@@ -114,7 +110,7 @@ def train_models(X_exp_test):
         y_test_prediction.to_csv(base_path + path + 'predictions/' + name + '_test.csv', index=False)
         joblib.dump(model, base_path + path + 'model/' + name + '.pkl') 
         recorded_cv.append(metrics) 
-        
+
     writer = pd.ExcelWriter(base_path + 'ExperimentalModels/model_metrics.xlsx')
     for metric, name in zip(recorded_cv, names):
         metric.to_excel(writer, sheet_name=name)
