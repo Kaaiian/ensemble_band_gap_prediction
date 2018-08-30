@@ -104,7 +104,7 @@ X_ensemble_train['rf'] = rf_train
 #X_ensemble_train['mp'] = mp_train
 X_ensemble_train['combined'] = combined_train
 
-#display.actual_vs_predicted(X_ensemble_train['combined'], X_ensemble_train['aflow'])
+#display.actual_vs_predicted(y_exp_train, X_ensemble_train['combined'], data_label='Predicted DFT value', main_color='#967bb6')
 #display.actual_vs_predicted(y_exp_train, X_ensemble_train['svr'])
 
 
@@ -119,10 +119,10 @@ lr = LinearRegression()
 #
 model = svr
 #
-#y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
-#display.actual_vs_predicted(y_actual, y_predicted)
-#print(metrics.T.mean())
-#print((y_actual, y_predicted))
+y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
+display.actual_vs_predicted(y_actual, y_predicted, data_label='Ensemble Prediction', main_color='#008080')
+print(metrics.T.mean())
+print((y_actual, y_predicted))
 
 # %%
 # # fit model if suitable results are found
@@ -142,5 +142,5 @@ y_ensemble = model.predict(X_ensemble_test)
 
 return_metrics(y_exp_test, y_ensemble, X_ensemble_test)
 
-display.actual_vs_predicted(y_exp_test, y_ensemble)
-display.actual_vs_predicted(y_exp_test, X_ensemble_test['svr'])
+display.actual_vs_predicted(y_exp_test, y_ensemble, data_label='DFT Ensemble Prediction', main_color='#008080')
+display.actual_vs_predicted(y_exp_test, X_ensemble_test['svr'], data_label='SVR Prediction')

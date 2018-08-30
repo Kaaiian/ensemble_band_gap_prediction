@@ -67,43 +67,47 @@ model = gbr
 #print('r2, mse:', r2, mse)
 
 # %%
-#models = [svr, gbr, rf, lr]
-#names = ['svr', 'gbr', 'rf', 'lr']
-models = [gbr]
-names = ['gbr']
+models = [svr, gbr, rf, lr]
+names = ['svr', 'gbr', 'rf', 'lr']
+#models = [gbr]
+#names = ['gbr']
 recorded_cv = []
 def train_models(X_exp_test):
     scaler = StandardScaler().fit(X_exp_train)
     X_train = scaler.transform(X_exp_train)
     normalizer = Normalizer().fit(X_train)
     X_train = pd.DataFrame(normalizer.transform(X_train))
+    X_exp_test_ = X_exp_test
     for model, name in zip(models, names):
-
+        X_exp_test = X_exp_test_
         if name == 'svr':
             path = 'ExperimentalModels/SupportVectorRegression/'
             X_exp_test = scaler.transform(X_exp_test)
             X_exp_test = pd.DataFrame(normalizer.transform(X_exp_test))
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
-
+            model.fit(X_train, y_exp_train)
+            
         elif name == 'gbr':
             path = 'ExperimentalModels/GradientBoostingRegression/'
             X_exp_test = scaler.transform(X_exp_test)
             X_exp_test = pd.DataFrame(normalizer.transform(X_exp_test))
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
+            model.fit(X_train, y_exp_train)
 
         elif name == 'rf':
             path = 'ExperimentalModels/RandomForestRegression/'
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
+            model.fit(X_exp_train, y_exp_train)
 
         elif name == 'lr':
             path = 'ExperimentalModels/LinearRegression/'
             X_exp_test = scaler.transform(X_exp_test)
             X_exp_test = pd.DataFrame(normalizer.transform(X_exp_test))
             y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_train, y_exp_train, model, N=10, random_state=1)
+            model.fit(X_train, y_exp_train)
+            
         else:
             print('error!')
-
-        model.fit(X_train, y_exp_train)
 
         y_test_prediction = pd.Series(model.predict(X_exp_test))
         display.actual_vs_predicted(y_actual, y_predicted, data_label= name + ' prediction', save=True, save_name=base_path + path + 'figures/' + name)
