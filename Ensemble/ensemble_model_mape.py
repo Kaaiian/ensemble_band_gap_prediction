@@ -102,9 +102,9 @@ X_ensemble_train['rf'] = rf_train
 #X_ensemble_train['lr'] = lr_train
 #X_ensemble_train['aflow'] = aflow_train
 #X_ensemble_train['mp'] = mp_train
-X_ensemble_train['combined'] = combined_train
+#X_ensemble_train['combined'] = combined_train
 
-#display.actual_vs_predicted(y_exp_train, X_ensemble_train['combined'], data_label='Predicted DFT value', main_color='#967bb6')
+display.actual_vs_predicted(y_exp_train, X_ensemble_train['combined'], data_label='Prediction of DFT value', main_color='#c786cf', save=True, save_name='dft-predicted_vs_actual')
 #display.actual_vs_predicted(y_exp_train, X_ensemble_train['svr'])
 
 
@@ -119,8 +119,18 @@ lr = LinearRegression()
 #
 model = svr
 #
+
+custom_axis = {}
+custom_axis['xlim_min'] = -0.3
+custom_axis['xlim_max'] = 12
+custom_axis['xlim_min'] = -0.3
+custom_axis['ylim_max'] = 12
+custom_axis['ticks'] = np.arange(-0, 13)
+
 y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
-display.actual_vs_predicted(y_actual, y_predicted, data_label='DFT Ensemble Prediction', main_color='#008080', custom_axis=custom_axis, save=False, save_name='figures/DFT Ensemble CV-Prediction')
+
+display.actual_vs_predicted(y_actual, y_predicted, data_label='Ensemble Prediction', main_color='#008080', save=True, save_name='exp ensm pred', custom_axis=custom_axis)
+
 print(metrics.T.mean())
 #print((y_actual, y_predicted))
 
