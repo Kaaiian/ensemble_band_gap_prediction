@@ -331,6 +331,10 @@ class CrossValidate:
         max_value = 0
         data_index = []
 
+        
+        if len(self.nn_dict) >= 1:
+            initial_weights = model.get_weights()
+
         for train_index, test_index in kf.split(y):
             data_index += list(test_index)
             X_train, X_test = X.iloc[train_index], X.iloc[test_index]
@@ -355,7 +359,8 @@ class CrossValidate:
                 X_train = normalizer.transform(X_train)
                 # normalizer = Normalizer().fit(X_test)
                 X_test = normalizer.transform(X_test)
-
+            if len(self.nn_dict) >= 1:    
+                model.set_weights(initial_weights)
             model.fit(X_train, y_train, **self.nn_dict)
 
             predicted_test = model.predict(X_test)

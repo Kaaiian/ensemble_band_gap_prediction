@@ -120,9 +120,9 @@ lr = LinearRegression()
 model = svr
 #
 y_actual, y_predicted, metrics, data_index = cv.cross_validate(X_ensemble_train, y_exp_train, model, N=10, random_state=7, scale_data=False)
-display.actual_vs_predicted(y_actual, y_predicted, data_label='Ensemble Prediction', main_color='#008080')
+display.actual_vs_predicted(y_actual, y_predicted, data_label='DFT Ensemble Prediction', main_color='#008080', custom_axis=custom_axis, save=False, save_name='figures/DFT Ensemble CV-Prediction')
 print(metrics.T.mean())
-print((y_actual, y_predicted))
+#print((y_actual, y_predicted))
 
 # %%
 # # fit model if suitable results are found
@@ -142,5 +142,15 @@ y_ensemble = model.predict(X_ensemble_test)
 
 return_metrics(y_exp_test, y_ensemble, X_ensemble_test)
 
-display.actual_vs_predicted(y_exp_test, y_ensemble, data_label='DFT Ensemble Prediction', main_color='#008080')
-display.actual_vs_predicted(y_exp_test, X_ensemble_test['svr'], data_label='SVR Prediction')
+# %%
+custom_axis = {}
+
+custom_axis['xlim_min'] = -0.5
+custom_axis['xlim_max'] = 12.5
+custom_axis['ylim_min'] = -0.5
+custom_axis['ylim_max'] = 12.5
+custom_axis['ticks'] = [0, 2, 4, 6, 8, 10, 12]
+
+
+display.actual_vs_predicted(y_exp_test, y_ensemble, data_label='DFT Ensemble Prediction', main_color='#008080', custom_axis=custom_axis, save=False, save_name='figures/DFT Ensemble Prediction')
+display.actual_vs_predicted(y_exp_test, X_ensemble_test['svr'], data_label='SVR Prediction', custom_axis=custom_axis, save=False, save_name='figures/SVR Prediction')

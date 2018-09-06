@@ -43,8 +43,8 @@ load_model:
         self.drop2 = 0.35
         self.n3 = 89
         self.drop3 = 0.2
-        self.lr = 0.01
-        self.decay = 1e-2
+        self.lr = 0.005
+        self.decay = 5e-4
         pass
 
     def pre_fit_(self, df, prop, database, epochs=500, batch_size=2500, evaluate=False):

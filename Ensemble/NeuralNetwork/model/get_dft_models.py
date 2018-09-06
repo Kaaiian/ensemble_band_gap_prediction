@@ -111,8 +111,50 @@ def train_model(df, prop, database):
     
     modeldft.save_model()
 
+
+def get_cv_predictions(df, prop, database):
+    modeldft = ModelDFT()
+    if database == 'combined':
+        epochs = 800
+    elif database == 'aflow':
+        epochs = 1500
+    else:
+        epochs = 1500
+    
+    cv.nn_dict = {'epochs':epochs, 'batch_size':epochs, 'verbose':0}
+    cv.nn_dict = {'epochs':epochs, 'batch_size':2500, 'verbose':0}
+    modeldft.dummy_model(df, prop, database, epochs=epochs, batch_size=epochs, evaluate=False)
+    X = modeldft.X_train
+    y = modeldft.y_train
+    y_actual, y_predicted, metrics, data_index = cv.cross_validate(X, y, modeldft.model, random_state=13, N=10)
+
+    custom_axis = {}
+
+    custom_axis['xlim_min'] = 0
+    custom_axis['xlim_max'] = 10
+    custom_axis['ylim_min'] = 0
+    custom_axis['ylim_max'] = 10
+    custom_axis['ticks'] = np.arange(0, 11, 1)
+    
+    display.actual_vs_predicted(y_actual, y_predicted, main_color='#073b4c', mfc='#073b4c', data_label=database+' CV Prediction', custom_axis=custom_axis, save=True, save_name='figures/'+database+' CV Prediction')
+    metrics = metrics
+    print(metrics.T.mean())
+    return metrics
+
 # %%
 
+#for database in ['combined', 'aflow', 'mp']:
+#    df, prop, database = combined_band_gap(database)
+#    train_model(df, prop, database)
+
+# %%
+    
+recorded_cv = []
 for database in ['combined', 'aflow', 'mp']:
     df, prop, database = combined_band_gap(database)
-    train_model(df, prop, database)
+    metrics = get_cv_predictions(df, prop, database)
+    recorded_cv.append(metrics) 
+
+writer = pd.ExcelWriter('model_metrics.xlsx')
+for metric, name in zip(recorded_cv, ['combined', 'aflow', 'mp']):
+    metric.to_excel(writer, sheet_name=name)
