@@ -414,6 +414,7 @@ class DisplayData:
         self.markersize = 16
         self.alpha = 1
         self.main_color='#073b4c'
+        self.edgewidth = 1
         pass
 
     def actual_vs_predicted(self,
@@ -468,7 +469,7 @@ class DisplayData:
 #                 linestyle='None', mew=2, markerfacecolor='w', markersize=16)
 
         plt.plot(y_actual, y_predicted, color=main_color, marker='o',
-                 linestyle='None', mew=2, markerfacecolor=mfc, alpha=self.alpha,  markersize=self.markersize)
+                 linestyle='None', mew=2, markerfacecolor=mfc, alpha=self.alpha,  markersize=self.markersize, markeredgewidth=self.edgewidth)
         if ideal_line is True:
             plt.plot([min(y_actual), max(y_actual)], [min(y_actual), max(y_actual)],
                      'k--', lw=3)

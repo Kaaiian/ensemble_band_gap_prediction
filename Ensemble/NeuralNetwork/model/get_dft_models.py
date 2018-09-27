@@ -136,7 +136,7 @@ def get_cv_predictions(df, prop, database):
     custom_axis['ylim_max'] = 10
     custom_axis['ticks'] = np.arange(0, 11, 1)
     
-    display.actual_vs_predicted(y_actual, y_predicted, main_color='#073b4c', mfc='#073b4c', data_label=database+' CV Prediction', custom_axis=custom_axis, save=True, save_name='figures/'+database+' CV Prediction')
+    display.actual_vs_predicted(y_actual, y_predicted, main_color='#073b4c', mfc='#073b4c', data_label=database+' CV Prediction', custom_axis=custom_axis, save=False, save_name='figures/'+database+' CV Prediction')
     metrics = metrics
     print(metrics.T.mean())
     return metrics
@@ -155,6 +155,6 @@ for database in ['combined', 'aflow', 'mp']:
     metrics = get_cv_predictions(df, prop, database)
     recorded_cv.append(metrics) 
 
-writer = pd.ExcelWriter('model_metrics.xlsx')
-for metric, name in zip(recorded_cv, ['combined', 'aflow', 'mp']):
-    metric.to_excel(writer, sheet_name=name)
+#writer = pd.ExcelWriter('model_metrics.xlsx')
+#for metric, name in zip(recorded_cv, ['combined', 'aflow', 'mp']):
+#    metric.to_excel(writer, sheet_name=name)
