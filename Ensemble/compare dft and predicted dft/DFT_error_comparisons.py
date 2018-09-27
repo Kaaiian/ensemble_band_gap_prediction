@@ -198,8 +198,13 @@ plt.ylim((0,10))
 plt.show()
 
 # %%
+residual_DFT = df_matched['exp'] - df_matched['dft']
+residual_pred = df_matched['exp'] - df_matched['prediction']
 
-residual = df_matched['dft'] - df_matched['prediction']
+plt.figure(2, figsize=(5, 5))
+plot1 = sns.distplot(residual_DFT, color='r', label='Calculated DFT')
+plot1.set_color('g')
 
-plt.figure(2, figsize=(10, 5))
-sns.distplot(residual, color='r')
+plt.figure(3, figsize=(5, 5))
+sns.distplot(residual_pred, color='b', label='DFT Prediction')
+sns.kdeplot(residual_DFT, color='r', label='Calculated DFT')
