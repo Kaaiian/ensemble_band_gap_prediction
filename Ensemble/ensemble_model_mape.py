@@ -31,28 +31,31 @@ def calc_mape(y_act, y_pred):
 
 def return_metrics(y_true, y_pred, X_ensemble):
     
-    scores = [r2_score(y_true, X_ensemble['svr']),
-            r2_score(y_true, X_ensemble['gbr']),
-            r2_score(y_true, X_ensemble['rf']),
+    scores = [
+#            r2_score(y_true, X_ensemble['svr']),
+#            r2_score(y_true, X_ensemble['gbr']),
+#            r2_score(y_true, X_ensemble['rf']),
             r2_score(y_true, y_pred)]
     
-    rmse = [np.sqrt(mean_squared_error(y_true, X_ensemble['svr'])),
-            np.sqrt(mean_squared_error(y_true, X_ensemble['gbr'])),
-            np.sqrt(mean_squared_error(y_true, X_ensemble['rf'])),
+    rmse = [
+#            np.sqrt(mean_squared_error(y_true, X_ensemble['svr'])),
+#            np.sqrt(mean_squared_error(y_true, X_ensemble['gbr'])),
+#            np.sqrt(mean_squared_error(y_true, X_ensemble['rf'])),
             np.sqrt(mean_squared_error(y_true, y_pred))]
     
-    mape = [calc_mape(y_true, X_ensemble['svr']),
-            calc_mape(y_true, X_ensemble['gbr']),
-            calc_mape(y_true, X_ensemble['rf']),
+    mape = [
+#            calc_mape(y_true, X_ensemble['svr']),
+#            calc_mape(y_true, X_ensemble['gbr']),
+#            calc_mape(y_true, X_ensemble['rf']),
             calc_mape(y_true, y_pred)]
     
     print(scores)
     print(rmse)
     print(mape)
     
-    print('% score', (scores[0]-scores[-1])/scores[0]*100)
-    print('% rmse', (rmse[0]-rmse[-1])/rmse[0]*100)
-    print('% mape', (mape[0]-mape[-1])/mape[0]*100)
+#    print('% score', (scores[0]-scores[-1])/scores[0]*100)
+#    print('% rmse', (rmse[0]-rmse[-1])/rmse[0]*100)
+#    print('% mape', (mape[0]-mape[-1])/mape[0]*100)
 
 # %%
 
@@ -94,8 +97,8 @@ combined_test = pd.read_csv('NeuralNetwork/predictions/test/y_exp_test_predicted
 # create ensemble feature vector from model predictions
 X_ensemble_train = pd.DataFrame(index=svr_train.index)
 X_ensemble_train['svr'] = svr_train
-X_ensemble_train['gbr'] = gbr_train
-X_ensemble_train['rf'] = rf_train
+#X_ensemble_train['gbr'] = gbr_train
+#X_ensemble_train['rf'] = rf_train
 #X_ensemble_train['lr'] = lr_train
 #X_ensemble_train['aflow'] = aflow_train
 #X_ensemble_train['mp'] = mp_train
@@ -150,8 +153,8 @@ model.fit(X_ensemble_train, y_exp_train)
 # create ensemble feature vector from model predictions
 X_ensemble_test = pd.DataFrame(index=svr_test.index)
 X_ensemble_test['svr'] = svr_test
-X_ensemble_test['gbr'] = gbr_test
-X_ensemble_test['rf'] = rf_test
+#X_ensemble_test['gbr'] = gbr_test
+#X_ensemble_test['rf'] = rf_test
 #X_ensemble_test['lr'] = lr_test
 #X_ensemble_test['aflow'] = aflow_test
 #X_ensemble_test['mp'] = mp_test

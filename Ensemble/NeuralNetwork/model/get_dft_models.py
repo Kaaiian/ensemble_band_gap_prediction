@@ -135,7 +135,10 @@ def get_cv_predictions(df, prop, database):
     custom_axis['ylim_min'] = 0
     custom_axis['ylim_max'] = 10
     custom_axis['ticks'] = np.arange(0, 11, 1)
-    
+    df_act_pred = pd.DataFrame()
+    df_act_pred['actual'] = y_actual.values
+    df_act_pred['pred'] = y_predicted.values
+    df_act_pred.to_csv('NN_combined_act_vs_pred.csv', index=False)
     display.actual_vs_predicted(y_actual, y_predicted, main_color='#073b4c', mfc='#073b4c', data_label=database+' CV Prediction', custom_axis=custom_axis, save=False, save_name='figures/'+database+' CV Prediction')
     metrics = metrics
     print(metrics.T.mean())
@@ -149,11 +152,18 @@ def get_cv_predictions(df, prop, database):
 
 # %%
     
+#recorded_cv = []
+#for database in ['combined', 'aflow', 'mp']:
+#    df, prop, database = combined_band_gap(database)
+#    metrics = get_cv_predictions(df[0:100], prop, database)
+#    recorded_cv.append(metrics) 
+
 recorded_cv = []
-for database in ['combined', 'aflow', 'mp']:
+for database in ['combined']:
     df, prop, database = combined_band_gap(database)
     metrics = get_cv_predictions(df, prop, database)
     recorded_cv.append(metrics) 
+
 
 #writer = pd.ExcelWriter('model_metrics.xlsx')
 #for metric, name in zip(recorded_cv, ['combined', 'aflow', 'mp']):

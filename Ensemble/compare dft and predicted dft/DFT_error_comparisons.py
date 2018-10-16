@@ -34,6 +34,8 @@ df_exp_test = pd.DataFrame()
 df_exp_test['aflow'] = df_exp_aflow['target']
 df_exp_test['mp'] = df_exp_mp['target']
 
+df_combined_cv = pd.read_csv('NN_combined_act_vs_pred.csv')
+
 #df_exp['mp'] = df_exp_mp['target']
 
 # %%
@@ -149,9 +151,9 @@ df_pred_test = pd.read_csv('y_exp_test_predicted NN combined Band Gap.csv')
 df_pred_test.index = df_exp_test['formula']
 
 df_matched_pred = pd.concat([df_pred_train, df_pred_test])
-df_matched_pred.columns = ['prediction']
+df_matched_pred.columns = ['predicted']
 
-df_matched['prediction'] = df_matched_pred['prediction']
+df_matched['predicted'] = df_matched_pred['predicted']
 # %%
 
 score_mp = r2_score(df_matched['exp'], df_matched['dft'])
@@ -159,9 +161,9 @@ rmse_mp = np.sqrt(mean_squared_error(df_matched['exp'], df_matched['dft']))
 print('(dft) r2, rmse:', score_mp, rmse_mp)
 
 
-score_mp = r2_score(df_matched['exp'], df_matched['prediction'])
-rmse_mp = np.sqrt(mean_squared_error(df_matched['exp'], df_matched['prediction']))
-print('(prediction) r2, rmse:', score_mp, rmse_mp)
+score_mp = r2_score(df_matched['exp'], df_matched['predicted'])
+rmse_mp = np.sqrt(mean_squared_error(df_matched['exp'], df_matched['predicted']))
+print('(predicted) r2, rmse:', score_mp, rmse_mp)
 
 plt.figure(1, figsize=(7, 7))
 font = {'family': 'DejaVu Sans',
@@ -170,9 +172,9 @@ font = {'family': 'DejaVu Sans',
 plt.rc('font', **font)
 plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
 plt.plot(df_matched['exp'], df_matched['dft'],  color='#CC99CC', marker='D', linestyle='None', mew=2, markerfacecolor=None, alpha=0.6,  markersize=10, markeredgewidth=1)
-plt.plot(df_matched['exp'], df_matched['prediction'],  color='#708238', marker='o', linestyle='None', mew=2, markerfacecolor=None, alpha=0.5,  markersize=10, markeredgewidth=1)
+plt.plot(df_matched['exp'], df_matched['predicted'],  color='#708238', marker='o', linestyle='None', mew=2, markerfacecolor=None, alpha=0.5,  markersize=10, markeredgewidth=1)
 plt.plot(df_matched['exp'], df_matched['exp'], 'k--')
-plt.legend(['DFT (aflow and MP)', 'ML Prediction of DFT', 'Ideal Performance'])
+plt.legend(['DFT (aflow and MP)', 'ML predicted of DFT', 'Ideal Performance'])
 plt.xlabel('Experimental Band Gap (eV)', fontsize=22)
 plt.ylabel('Predicted Band Gap (eV)', fontsize=22)
 plt.xlim((0, 12))
@@ -188,9 +190,9 @@ font = {'family': 'DejaVu Sans',
         'size': 18}
 plt.rc('font', **font)
 plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
-plt.plot(df_matched['dft'], df_matched['prediction'],  color='#708238', marker='o', linestyle='None', mew=2, markerfacecolor=None, alpha=0.5,  markersize=10, markeredgewidth=1)
+plt.plot(df_matched['dft'], df_matched['predicted'],  color='#708238', marker='o', linestyle='None', mew=2, markerfacecolor=None, alpha=0.5,  markersize=10, markeredgewidth=1)
 plt.plot(df_matched['exp'], df_matched['exp'], 'k--')
-plt.legend(['ML Prediction of DFT', 'Ideal Performance'])
+plt.legend(['ML predicted of DFT', 'Ideal Performance'])
 plt.xlabel('DFT Band Gap (eV)', fontsize=22)
 plt.ylabel('Predicted Band Gap (eV)', fontsize=22)
 plt.xlim((0, 10))
@@ -199,12 +201,108 @@ plt.show()
 
 # %%
 residual_DFT = df_matched['exp'] - df_matched['dft']
-residual_pred = df_matched['exp'] - df_matched['prediction']
+residual_pred = df_matched['exp'] - df_matched['predicted']
 
-plt.figure(2, figsize=(5, 5))
+
+
+fig = plt.figure(1, figsize=(3, 3))
 plot1 = sns.distplot(residual_DFT, color='r', label='Calculated DFT')
-plot1.set_color('g')
+plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+kde = plot1.get_lines()
+plt.setp(kde, linewidth=4)
+plt.legend(['DFT residual'])
 
-plt.figure(3, figsize=(5, 5))
-sns.distplot(residual_pred, color='b', label='DFT Prediction')
-sns.kdeplot(residual_DFT, color='r', label='Calculated DFT')
+fig = plt.figure(2, figsize=(3, 3))
+font = {'family': 'DejaVu Sans',
+        'weight': 'normal',
+        'size': 18}
+plt.rc('font', **font)
+plot1 = sns.distplot(residual_pred, color='b')
+line_styles = ['--']
+colors = [ 'b']
+i = 0
+for line in plot1.get_lines():
+    line.set_linestyle(line_styles[i])
+    line.set_linewidth(4)
+    line.set_color(colors[i])
+    i += 1
+plt.legend(['ML residual'])
+plt.show()
+
+fig = plt.figure(3, figsize=(3, 3))
+font = {'family': 'DejaVu Sans',
+        'weight': 'normal',
+        'size': 18}
+plt.rc('font', **font)
+plot1 = sns.kdeplot(residual_pred, color='b')
+plot2 = sns.kdeplot(residual_DFT, color='r')
+line_styles = ['-', '--']
+colors = ['r', 'b']
+i = 0
+for line in plot1.get_lines():
+    line.set_linestyle(line_styles[i])
+    line.set_linewidth(4)
+    line.set_color(colors[i])
+    i += 1
+plt.legend(['DFT residual', 'predicted DFT residual'])
+plt.show()
+
+# %%
+
+fig = plt.figure(1, figsize=(8, 8))
+
+ax1 = fig.add_subplot(221)
+ax1 = sns.distplot(residual_DFT, color='r', label='Calculated DFT')
+plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+kde = plot1.get_lines()
+plt.setp(kde, linewidth=4)
+
+ax2 = fig.add_subplot(222)
+ax2 = sns.distplot(residual_pred, color='b', label='Calculated DFT')
+plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+kde = plot1.get_lines()
+plt.setp(kde, linewidth=4)
+
+
+plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0, hspace=None)
+
+ax1 = fig.add_subplot(223)
+ax1 = sns.distplot(residual_DFT, color='r', label='Calculated DFT')
+plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+kde = plot1.get_lines()
+plt.setp(kde, linewidth=4)
+
+ax2 = fig.add_subplot(224)
+ax2 = sns.distplot(residual_pred, color='b', label='Calculated DFT')
+plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+kde = plot1.get_lines()
+plt.setp(kde, linewidth=4)
+
+#ax3 = fig.add_subplot(212)
+#ax3 = sns.kdeplot(residual_pred, color='b')
+#plot2 = sns.kdeplot(residual_DFT, color='r')
+#plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+#kde = plot1.get_lines()
+#plt.setp(kde, linewidth=4)
+
+
+# %%
+
+df_cv = pd.read_csv('NN_combined_act_vs_pred.csv')
+plt.figure(2, figsize=(6, 6))
+font = {'family': 'DejaVu Sans',
+        'weight': 'normal',
+        'size': 18}
+plt.rc('font', **font)
+plt.tick_params(direction='in', length=10, bottom=True, top=True, left=True, right=True)
+plt.plot(df_cv['actual'], df_cv['predicted'],  color='#CC99CC', marker='o', linestyle='None', mew=2, markerfacecolor=None, alpha=0.05,  markersize=10, markeredgewidth=1)
+plt.plot(df_matched['dft'], df_matched['predicted'],  color='#708238', marker='X', linestyle='None', mew=2, markerfacecolor=None, alpha=0.5,  markersize=10, markeredgewidth=1)
+plt.plot([0, 10], [0, 10], 'k--')
+plt.legend(['CV predicted values', 'ML predicted of DFT', 'Ideal Performance'])
+plt.xlabel('DFT Band Gap (eV)', fontsize=22)
+plt.ylabel('Predicted Band Gap (eV)', fontsize=22)
+plt.xlim((0, 10))
+plt.ylim((0,10))
+plt.show()
+
+plt.plot(df_combined_cv['actual'], df_combined_cv['predicted'], 'rx', alpha=0.1)
