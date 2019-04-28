@@ -469,7 +469,7 @@ class DisplayData:
 #                 linestyle='None', mew=2, markerfacecolor='w', markersize=16)
 
         plt.plot(y_actual, y_predicted, color=main_color, marker='o',
-                 linestyle='None', mew=2, markerfacecolor=mfc, alpha=self.alpha,  markersize=self.markersize, markeredgewidth=self.edgewidth)
+                 linestyle='None', markerfacecolor=mfc, alpha=self.alpha,  markersize=self.markersize, markeredgewidth=self.edgewidth)
         if ideal_line is True:
             plt.plot([min(y_actual), max(y_actual)], [min(y_actual), max(y_actual)],
                      'k--', lw=3)

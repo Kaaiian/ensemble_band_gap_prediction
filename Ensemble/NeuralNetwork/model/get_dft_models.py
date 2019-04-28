@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 16 20:11:38 2018
-
-@author: steven
-"""
 # =============================================================================
 # # YOU NEED TO SET THE PATH TO MATCH THE LOCATION OF THE Ensemble FOLDER
 # =============================================================================
@@ -146,25 +139,19 @@ def get_cv_predictions(df, prop, database):
 
 # %%
 
-#for database in ['combined', 'aflow', 'mp']:
-#    df, prop, database = combined_band_gap(database)
-#    train_model(df, prop, database)
+def run():
 
-# %%
-    
-#recorded_cv = []
-#for database in ['combined', 'aflow', 'mp']:
-#    df, prop, database = combined_band_gap(database)
-#    metrics = get_cv_predictions(df[0:100], prop, database)
-#    recorded_cv.append(metrics) 
+    for database in ['combined', 'aflow', 'mp']:
+        df, prop, database = combined_band_gap(database)
+        train_model(df, prop, database)
 
-recorded_cv = []
-for database in ['combined']:
-    df, prop, database = combined_band_gap(database)
-    metrics = get_cv_predictions(df, prop, database)
-    recorded_cv.append(metrics) 
+    recorded_cv = []
+    for database in ['combined']:
+        df, prop, database = combined_band_gap(database)
+        metrics = get_cv_predictions(df, prop, database)
+        recorded_cv.append(metrics) 
 
+    writer = pd.ExcelWriter('model_metrics.xlsx')
+    for metric, name in zip(recorded_cv, ['combined', 'aflow', 'mp']):
+        metric.to_excel(writer, sheet_name=name)
 
-#writer = pd.ExcelWriter('model_metrics.xlsx')
-#for metric, name in zip(recorded_cv, ['combined', 'aflow', 'mp']):
-#    metric.to_excel(writer, sheet_name=name)

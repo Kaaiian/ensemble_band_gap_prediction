@@ -1,0 +1,8 @@
+numpy
+matplotlib
+keras
+pandas
+pymatgen
+tensorflow-gpu
+spyder
+scikit-learn

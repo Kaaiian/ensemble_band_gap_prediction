@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Cutsom class to allow for modeling of dft data using Neural Network
-
-"""
-
 base_path = r'/home/steven/Research/PhD/DFT Ensemble Models/publication code/Ensemble/'
 
 from keras.models import Sequential
