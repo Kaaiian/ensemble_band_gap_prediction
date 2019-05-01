@@ -1,8 +1,15 @@
+# ONLY REQUIRED IF YOU WANT TO RERUN THE NEURAL NETWORK.
+# YOU WILL NEED AN NVIDIA GRAPHICS CARD AND CUDA INSTALLED ON YOUR COMPUTER.
+# ------------------
+# tensorflow-gpu # VERSION WILL NEED TO MATCH YOUR CUDA VERSION
+# keras
+# ------------------
+
+# needed in non-nerual network code. 
+# (everything but "pymatgeh" should be satisfied with the anaconda installation of python3.)
 numpy
-matplotlib
-keras
-pandas
-pymatgen
-tensorflow-gpu
 spyder
+pandas
+matplotlib
 scikit-learn
+pymatgen
